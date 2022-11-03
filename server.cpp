@@ -71,6 +71,7 @@ int main(int argc, char *argv[]) {
 
     cout << "Server starting..." << endl;
     while (true) {
+        cout << "Server waiting..." << endl;
         // receive
         bzero(&receiveBuffer, BUFFSIZE);
         int len = sizeof(clientaddr);
