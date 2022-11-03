@@ -79,53 +79,55 @@ void reassemblePkt(char pkt[], char *content, int pktLength) {
 
 
 int main(int argc, char *argv[]) {
-    struct sockaddr_in servaddr; // Server address
-    struct sockaddr_in cliaddr; // Client address
-    char sendBuffer[BUFFSIZE];
-    char receiveBuffer[BUFFSIZE];
-    float errorProbability;
-    int fileLength;
-
-    // Check input IP
-    if (argc != 2) {
-        perror("error: no IP");
-        exit(EXIT_FAILURE);
-    }
-
-    char *phostname = argv[1];
-    // Get valid IP from args
-    struct hostent *pservname = gethostbyname(phostname);
-    if (pservname == NULL) {
-        perror("error: no server name");
-        exit(EXIT_FAILURE);
-    }
-
-    // Create socket
-    int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (sockfd == 0) {
-        perror("error: no socket");
-        exit(EXIT_FAILURE);
-    }
-
-    // Initialize client
-    bzero(&servaddr, sizeof(struct sockaddr_in));
-    servaddr.sin_family = AF_INET;
-    servaddr.sin_port = htons(SERV_PORT);
-    servaddr.sin_addr.s_addr = inet_addr(phostname);
-    int serverLength = sizeof(servaddr);
-
-    // Start output
-    cout << "Client start:" << endl;
-
-    // Get packet error probability
     while (true) {
-        cout << "Enter packet error probability [0, 1]: ";
-        cin >> errorProbability;
-        if (errorProbability >= 0 && errorProbability <= 1) {
-            break;
+        srand(time(NULL));
+        struct sockaddr_in servaddr; // Server address
+        struct sockaddr_in cliaddr; // Client address
+        char sendBuffer[BUFFSIZE];
+        char receiveBuffer[BUFFSIZE];
+        float errorProbability;
+        int fileLength;
+
+        // Check input IP
+        if (argc != 2) {
+            perror("error: no IP");
+            exit(EXIT_FAILURE);
         }
-        cout << "Invalid probability, please input a value between 0 and 1" << endl;
-    
+
+        char *phostname = argv[1];
+        // Get valid IP from args
+        struct hostent *pservname = gethostbyname(phostname);
+        if (pservname == NULL) {
+            perror("error: no server name");
+            exit(EXIT_FAILURE);
+        }
+
+        // Create socket
+        int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+        if (sockfd == 0) {
+            perror("error: no socket");
+            exit(EXIT_FAILURE);
+        }
+
+        // Initialize client
+        bzero(&servaddr, sizeof(struct sockaddr_in));
+        servaddr.sin_family = AF_INET;
+        servaddr.sin_port = htons(SERV_PORT);
+        servaddr.sin_addr.s_addr = inet_addr(phostname);
+        int serverLength = sizeof(servaddr);
+
+        // Start output
+        cout << "Client start:" << endl;
+
+        // Get packet error probability
+        while (true) {
+            cout << "Enter packet error probability [0, 1]: ";
+            cin >> errorProbability;
+            if (errorProbability >= 0 && errorProbability <= 1) {
+                break;
+            }
+            cout << "Invalid probability, please input a value between 0 and 1" << endl;
+        }    
 
         // Send filename to server
         bzero(&sendBuffer, BUFFSIZE);
@@ -148,7 +150,7 @@ int main(int argc, char *argv[]) {
         
         // Receive server response
         int receivedNum = recvfrom(sockfd, receiveBuffer, BUFFSIZE, 0, (struct sockaddr *)&servaddr, (socklen_t *)&serverLength);
-        if(receivedNum < 0) {
+        if (receivedNum < 0) {
             perror("error: recvfrom");
             exit(EXIT_FAILURE);
         }
@@ -156,12 +158,12 @@ int main(int argc, char *argv[]) {
         
         // Get length of file
         receivedNum = recvfrom(sockfd, receiveBuffer, BUFFSIZE, 0, (struct sockaddr *)&servaddr, (socklen_t *)&serverLength);
-        if(receivedNum < 0) {
+        if (receivedNum < 0) {
             perror("error: recvfrom");
             exit(EXIT_FAILURE);
         }
         sscanf(receiveBuffer, "%d", &fileLength);
-        if(fileLength == -1) {
+        if (fileLength == -1) {
             cout << "client end" << endl;
             break;
         }
@@ -178,12 +180,12 @@ int main(int argc, char *argv[]) {
         cout << "Receiving packet..." << endl;
         while(true) {
             receivedNum = recvfrom(sockfd, receiveBuffer, BUFFSIZE, 0, (struct sockaddr *)&servaddr, (socklen_t *)&serverLength);
-            if(receivedNum < 0) {
+            if (receivedNum < 0) {
                 perror("error: revfrom");
                 exit(EXIT_FAILURE);
             }
 
-            if(receivedNum == 0) {
+            if (receivedNum == 0) {
                 cout << "all packets received" << endl;
                 break;
             }
@@ -192,7 +194,7 @@ int main(int argc, char *argv[]) {
             int pktLength = receivedNum;
             char pkt[pktLength];
             memset(&pkt, 0, sizeof(pkt));
-            for(int i = 0; i < pktLength; i++) {
+            for (int i = 0; i < pktLength; i++) {
                 pkt[i] = receiveBuffer[i];
             }
 
@@ -207,7 +209,7 @@ int main(int argc, char *argv[]) {
             cout << "Received packet [" << seq << "] size: " << pktLength << " bytes from server | ";
 
             // Print packet and check result
-            if(checkPkt(pkt, pktLength)) {
+            if (checkPkt(pkt, pktLength)) {
                 cout << "pass" << endl;
             }
             else {
@@ -231,7 +233,7 @@ int main(int argc, char *argv[]) {
             }
             cout << "wrong input" << endl;
         }
-        if(con == 'n') {
+        if (con == 'n') {
             cout << "client end" << endl;
             break;
         }

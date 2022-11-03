@@ -6,7 +6,7 @@
         "request": "launch",
         "program": "${fileDirname}/${fileBasenameNoExtension}",
         "args": ["104.222.18.193"],
-        "stopAtEntry": false,
+        "stopAtEntry": true,
         "cwd": "${fileDirname}",
         "environment": [],
         "externalConsole": false,
