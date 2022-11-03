@@ -134,7 +134,7 @@ int main(int argc, char *argv[]) {
         char filename[128];
         cout << "Enter the requested filename: ";
         cin >> filename;
-
+        
         // Construct request to send
         string request = "GET ";
         request += filename;
