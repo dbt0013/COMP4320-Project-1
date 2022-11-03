@@ -98,14 +98,14 @@ int main(int argc, char *argv[]) {
         // Get valid IP from args
         struct hostent *pservname = gethostbyname(phostname);
         if (pservname == NULL) {
-            perror("error: no server name");
+            perror("error: servname");
             exit(EXIT_FAILURE);
         }
 
         // Create socket
         int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
         if (sockfd == 0) {
-            perror("error: no socket");
+            perror("error: sockfd");
             exit(EXIT_FAILURE);
         }
 
@@ -127,14 +127,14 @@ int main(int argc, char *argv[]) {
                 break;
             }
             cout << "Invalid probability, please input a value between 0 and 1" << endl;
-        }    
+        }
 
         // Send filename to server
         bzero(&sendBuffer, BUFFSIZE);
         char filename[128];
         cout << "Enter the requested filename: ";
         cin >> filename;
-        
+
         // Construct request to send
         string request = "GET ";
         request += filename;
@@ -237,5 +237,6 @@ int main(int argc, char *argv[]) {
             break;
         }
     }
+    
     return 0;
 }
