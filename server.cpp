@@ -154,8 +154,8 @@ int main(int argc, char *argv[]) {
             
             // add checksum to header
             int chkSum = checkSum(packet, PACKET_SIZE);
-            packet[0] = (char) (chkSum & 0xFF);
-            packet[1] = (char) ((chkSum >> 8) & 0xFF);
+            packet[2] = (char) (chkSum & 0xFF);
+            packet[3] = (char) ((chkSum >> 8) & 0xFF);
             
             // clear sendbuffer and send
             bzero(&sendBuffer, BUFFSIZE);
