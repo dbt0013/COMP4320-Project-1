@@ -33,6 +33,18 @@ int checkSum(char pkt[], int pktLength) {
     return sum;
 }
 
+string preview(char* p) {
+    string prev = "";
+    for (int i = 4; i < 54; i++) {
+        if (p[i] == '\0') {
+            break;
+        }
+        prev = prev + p[i];
+    }
+
+    return prev;
+}
+
 void error(char *msg) {
     perror(msg);
     exit(EXIT_FAILURE);
@@ -148,6 +160,11 @@ int main(int argc, char *argv[]) {
             // clear sendbuffer and send
             bzero(&sendBuffer, BUFFSIZE);
             int send;
+            string output = "Sending packet ";
+            output = output + to_string(segmentCount);
+            output = output + " . Preview: ";
+            output = output + preview(packet);
+            cout << output << endl;
             send = sendto(sockfd, (char *)sendBuffer, PACKET_SIZE, 0, (struct sockaddr *)&clientaddr, len);
 
             if (send < 0) {
