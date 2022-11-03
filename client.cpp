@@ -31,13 +31,6 @@ int checksum(char pkt[], int pktLength) {
     return sum;
 }
 
-
-void error(char *msg) {
-    perror(msg);
-    exit(EXIT_FAILURE);
-}
-
-
 void gremlin(char pkt[], int pktLength, float probability) {
     double randValue = rand() / RAND_MAX;
     if (randValue > probability) {
@@ -95,20 +88,23 @@ int main(int argc, char *argv[]) {
 
     // Check input IP
     if (argc != 2) {
-        error("error: no IP");
+        perror("error: no IP");
+        exit(EXIT_FAILURE);
     }
 
     char *phostname = argv[1];
     // Get valid IP from args
     struct hostent *pservname = gethostbyname(phostname);
     if (pservname == NULL) {
-        error("error: no server name");
+        perror("error: no server name");
+        exit(EXIT_FAILURE);
     }
 
     // Create socket
     int sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd == 0) {
-        error("error: no socket");
+        perror("error: no socket");
+        exit(EXIT_FAILURE);
     }
 
     // Initialize client
@@ -146,20 +142,23 @@ int main(int argc, char *argv[]) {
         strcpy(sendBuffer, request.c_str());
         int sendNum = sendto(sockfd, sendBuffer, strlen(sendBuffer), 0, (struct sockaddr *)&servaddr, serverLength);
         if (sendNum < 0) {
-            error("error: sendto");
+            perror("error: sendto");
+            exit(EXIT_FAILURE);
         }
         
         // Receive server response
         int receivedNum = recvfrom(sockfd, receiveBuffer, BUFFSIZE, 0, (struct sockaddr *)&servaddr, (socklen_t *)&serverLength);
         if(receivedNum < 0) {
-            error("error: recvfrom");
+            perror("error: recvfrom");
+            exit(EXIT_FAILURE);
         }
         cout << "Server response: \n" << receiveBuffer;
         
         // Get length of file
         receivedNum = recvfrom(sockfd, receiveBuffer, BUFFSIZE, 0, (struct sockaddr *)&servaddr, (socklen_t *)&serverLength);
         if(receivedNum < 0) {
-            error("error: recvfrom");
+            perror("error: recvfrom");
+            exit(EXIT_FAILURE);
         }
         sscanf(receiveBuffer, "%d", &fileLength);
         if(fileLength == -1) {
@@ -171,7 +170,8 @@ int main(int argc, char *argv[]) {
         char *pFileContent = (char *)malloc(sizeof(char) * fileLength);
         FILE *pFile = fopen(filename, "w");
         if (pFile == NULL) {
-            error("error: open file");
+            perror("error: open file");
+            exit(EXIT_FAILURE);
         }
 
         // Receive packet
@@ -179,7 +179,8 @@ int main(int argc, char *argv[]) {
         while(true) {
             receivedNum = recvfrom(sockfd, receiveBuffer, BUFFSIZE, 0, (struct sockaddr *)&servaddr, (socklen_t *)&serverLength);
             if(receivedNum < 0) {
-                error("error: revfrom");
+                perror("error: revfrom");
+                exit(EXIT_FAILURE);
             }
 
             if(receivedNum == 0) {
