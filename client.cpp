@@ -125,7 +125,7 @@ int main(int argc, char *argv[]) {
         while(true) {
             receivedNum = recvfrom(sockfd, receiveBuffer, BUFFSIZE, 0, (struct sockaddr *)&servaddr, (socklen_t *)&serverLength);
             if (receivedNum < 0) {
-                perror("error: revfrom");
+                perror("error: recvfrom");
                 exit(EXIT_FAILURE);
             }
 
