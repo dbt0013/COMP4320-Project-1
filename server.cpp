@@ -162,8 +162,9 @@ int main(int argc, char *argv[]) {
             int send;
             string output = "Sending packet ";
             output = output + to_string(segmentCount);
-            output = output + " . Preview: ";
+            output = output + ". ";
             output = output + preview(packet);
+            output = output + "...";
             cout << output << endl;
             send = sendto(sockfd, (char *)sendBuffer, PACKET_SIZE, 0, (struct sockaddr *)&clientaddr, len);
 
@@ -171,7 +172,7 @@ int main(int argc, char *argv[]) {
                 perror("error: sending packet");
                 exit(EXIT_FAILURE);
             }
-
+            bzero(&sendBuffer, BUFFSIZE);
             byteCount += datasize;
             segmentCount++;
         }
