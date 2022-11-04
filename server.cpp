@@ -18,7 +18,7 @@ using namespace std;
 #define DATA_SIZE 508
 #define MAXLINE 4096
 #define BUFFSIZE 4096
-#define PORT 8977
+#define PORT 9877
 
 int checkSum(char pkt[], int pktLength) {
     int sum = 0;

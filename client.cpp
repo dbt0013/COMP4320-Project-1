@@ -19,8 +19,8 @@ using namespace std;
 #define MAXLINE 4096 
 #define BUFFSIZE 8192
 #define PACKET_SIZE 512
-#define HEADER_SIZE 8
-#define DATA_SIZE 504
+#define HEADER_SIZE 4
+#define DATA_SIZE 508
 
 
 int checksum(char pkt[], int pktLength) {
@@ -54,9 +54,9 @@ void gremlin(char pkt[], int pktLength, float probability) {
 
 
 bool checkPkt(char pkt[], int pktLength) {
-    int count = 100000;
+    int count = 10;
     int sum;
-    for (int i = 0; i < 6; i++) {
+    for (int i = 2; i < 4; i++) {
         sum += (pkt[i] - '0') * count;
         count /= 10;
     }
@@ -65,9 +65,9 @@ bool checkPkt(char pkt[], int pktLength) {
 
 
 void reassemblePkt(char pkt[], char *content, int pktLength) {
-    int count = 1000;
+    int count = 10;
     int seq;
-    for (int i = 6; i < 10; i++) {
+    for (int i = 0; i < 2; i++) {
         seq += (pkt[i] - '0') * count;
         count /= 10;
     }
@@ -199,9 +199,9 @@ int main(int argc, char *argv[]) {
 
             // Gremlin
             gremlin(pkt, sizeof(pkt), errorProbability);
-            int count = 1000;
+            int count = 10;
             int seq;
-            for (int i = 6; i < 10; i++) {
+            for (int i = 0; i < 2; i++) {
                 seq += (pkt[i] - '0') * count;
                 count /= 10;
             }
