@@ -14,20 +14,15 @@
 using namespace std;
 
 #define PACKET_SIZE 512
-#define HEADER_SIZE 4
-#define DATA_SIZE 508
+#define HEADER_SIZE 10
+#define DATA_SIZE 502
 #define MAXLINE 4096
 #define BUFFSIZE 4096
 #define PORT 9877
 
 int checkSum(char pkt[], int pktLength) {
     int sum = 0;
-
-    for (int i = 4; i < pktLength; i++) {
-        if (pkt[i] == '\0') {
-            sum++;
-            break;
-        }
+    for(int i = 6; i < pktLength; i++) {
         sum += (int)pkt[i];
     }
     return sum;
@@ -87,16 +82,16 @@ int main(int argc, char *argv[]) {
         // receive
         bzero(&receiveBuffer, BUFFSIZE);
         int len = sizeof(clientaddr);
-        int n = recvfrom(sockfd, (char *)receiveBuffer, MAXLINE,
+        int receiveNum = recvfrom(sockfd, (char *)receiveBuffer, MAXLINE,
             MSG_WAITALL, ( struct sockaddr *) &clientaddr, (socklen_t *)&len);
 
-        if (n < 0) {
+        if (receiveNum < 0) {
             perror("error receiving from client");
             exit(EXIT_FAILURE);
         }
 
         // print obtained data
-        receiveBuffer[n] = '\0';
+        receiveBuffer[receiveNum] = '\0';
         printf("Client : %s\n", receiveBuffer);
 
         // get file request
@@ -128,12 +123,12 @@ int main(int argc, char *argv[]) {
         int byteCount = 0;
 
         for (int i = 0; i < (fileLength + (DATA_SIZE - 1)) / DATA_SIZE; i++) {
-            char packet[PACKET_SIZE];
+            char pkt[PACKET_SIZE];
             bool lastPacket = false;
 
             int datasize = DATA_SIZE;
 
-            // segment data into packet
+            // segment data into pkt
             if (len - byteCount < PACKET_SIZE - 4) {
                 datasize = len - byteCount;
                 lastPacket = true;
@@ -141,38 +136,43 @@ int main(int argc, char *argv[]) {
 
             int k = byteCount;
             for (int i = 4; i < PACKET_SIZE; i++) {
-                packet[i] = pFileContent[k];
+                pkt[i] = pFileContent[k];
                 k++;
             }
             if (lastPacket) {
-                packet[k] = '\0';
+                pkt[k] = '\0';
             }
 
             // add sequence to header
-            packet[0] = (char) (segmentCount & 0xFF);
-            packet[1] = (char) ((segmentCount >> 8) & 0xFF);
+            pkt[6] = i / 1000 % 10 + '0';
+            pkt[7] = i / 100 % 10 + '0';
+            pkt[8] = i / 10 % 10 + '0';
+            pkt[9] = i % 10 + '0';
             
             // add checksum to header
-            int chkSum = checkSum(packet, PACKET_SIZE);
-            packet[2] = (char) (chkSum & 0xFF);
-            packet[3] = (char) ((chkSum >> 8) & 0xFF);
+            int chkSum = checkSum(pkt, PACKET_SIZE);
+            pkt[0] = chkSum / 100000 % 10 + '0';
+            pkt[1] = chkSum / 10000 % 10 + '0';
+            pkt[2] = chkSum / 1000 % 10 + '0';
+            pkt[3] = chkSum / 100 % 10 + '0';
+            pkt[4] = chkSum / 10 % 10 + '0';
+            pkt[5] = chkSum % 10 + '0';
             
             // clear sendbuffer and send
             bzero(&sendBuffer, BUFFSIZE);
             int send;
-            string output = "Sending packet ";
+            string output = "Sending pkt ";
             output = output + to_string(segmentCount);
-            output = output + ". ";
-            output = output + preview(packet);
-            output = output + "...";
+            output = output + " . Preview: ";
+            output = output + preview(pkt);
             cout << output << endl;
             send = sendto(sockfd, (char *)sendBuffer, PACKET_SIZE, 0, (struct sockaddr *)&clientaddr, len);
 
             if (send < 0) {
-                perror("error: sending packet");
+                perror("error: sending pkt");
                 exit(EXIT_FAILURE);
             }
-            bzero(&sendBuffer, BUFFSIZE);
+
             byteCount += datasize;
             segmentCount++;
         }
