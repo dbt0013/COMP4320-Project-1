@@ -23,6 +23,56 @@ using namespace std;
 #define DATA_SIZE 502
 
 
+// Creates packet errors
+void gremlin(char pkt[], int pktLength, float probability) {
+    double randValue = rand() / RAND_MAX;
+    if (randValue > probability) {
+        return;
+    }
+    
+    if (randValue >= 0 && randValue < 0.5) {
+        pkt[(int)(randValue * pktLength)] = '0';
+    }
+    else if (randValue >= 0.5 && randValue < 0.8) {
+        for (int i = 0; i < 2; i++) {
+            pkt[(int)(randValue * pktLength)] = '0';
+        }
+    } 
+    else {
+        for (int i = 0; i < 3; i++){
+            pkt[(int)(randValue * pktLength)] = '0';
+        }
+    }
+}
+
+
+// Checks the sum of data in the packet, excluding header [0-5]
+int checksum(char pkt[], int pktLength) {
+    int sum = 0;
+    for(int i = 6; i < pktLength; i++) {
+        sum += (int)pkt[i];
+    }
+    return sum;
+}
+
+
+// Checks whether packet content matches its header
+bool checkPkt(char pkt[], int pktLength) {
+    int sum = (pkt[0] - '0') * 100000 + (pkt[1] - '0') * 10000 + (pkt[2] - '0') * 1000 
+        + (pkt[3] - '0') * 100 + (pkt[4] - '0') * 10 + (pkt[5] - '0');
+    return sum == checksum(pkt, pktLength);
+}
+
+
+// Places the packet in its proper place in the file
+void reassemblePkt(char pkt[], char *content, int pktLength) {
+    int seq = (pkt[6] - '0') * 1000 + (pkt[7] - '0') * 100 + (pkt[8] - '0') * 10 + (pkt[9] - '0');
+    for (int i = 0; i < pktLength - HEADER_SIZE; i++) {
+        content[seq * DATA_SIZE + i] = pkt[i + HEADER_SIZE];
+    }
+}
+
+
 int main(int argc, char *argv[]) {
     while (true) {
         srand(time(NULL));
@@ -125,7 +175,7 @@ int main(int argc, char *argv[]) {
         while(true) {
             receivedNum = recvfrom(sockfd, receiveBuffer, BUFFSIZE, 0, (struct sockaddr *)&servaddr, (socklen_t *)&serverLength);
             if (receivedNum < 0) {
-                perror("error: recvfrom");
+                perror("error: revfrom");
                 exit(EXIT_FAILURE);
             }
 
@@ -144,7 +194,7 @@ int main(int argc, char *argv[]) {
 
             // Generate packet errors if error probability > 0
             gremlin(pkt, sizeof(pkt), errorProbability);
-
+            
             int seq = ((pkt[6] - '0') * 1000 + (pkt[7] - '0') * 100 + (pkt[8] - '0') * 10 + (pkt[9] - '0'));
             cout << "Received packet [" << seq << "] size: " << pktLength << " bytes from server | ";
 
@@ -180,54 +230,4 @@ int main(int argc, char *argv[]) {
     }
     
     return 0;
-}
-
-
-// Creates packet errors
-void gremlin(char pkt[], int pktLength, float probability) {
-    double randValue = rand() / RAND_MAX;
-    if (randValue > probability) {
-        return;
-    }
-    
-    if (randValue >= 0 && randValue < 0.5) {
-        pkt[(int)(randValue * pktLength)] = '0';
-    }
-    else if (randValue >= 0.5 && randValue < 0.8) {
-        for (int i = 0; i < 2; i++) {
-            pkt[(int)(randValue * pktLength)] = '0';
-        }
-    } 
-    else {
-        for (int i = 0; i < 3; i++){
-            pkt[(int)(randValue * pktLength)] = '0';
-        }
-    }
-}
-
-
-// Checks whether packet content matches its header
-bool checkPkt(char pkt[], int pktLength) {
-    int sum = (pkt[0] - '0') * 100000 + (pkt[1] - '0') * 10000 + (pkt[2] - '0') * 1000 
-        + (pkt[3] - '0') * 100 + (pkt[4] - '0') * 10 + (pkt[5] - '0');
-    return sum == checksum(pkt, pktLength);
-}
-
-
-// Checks the sum of data in the packet, excluding header [0-5]
-int checksum(char pkt[], int pktLength) {
-    int sum = 0;
-    for(int i = 6; i < pktLength; i++) {
-        sum += (int)pkt[i];
-    }
-    return sum;
-}
-
-
-// Places the packet in its proper place in the file
-void reassemblePkt(char pkt[], char *content, int pktLength) {
-    int seq = (pkt[6] - '0') * 1000 + (pkt[7] - '0') * 100 + (pkt[8] - '0') * 10 + (pkt[9] - '0');
-    for (int i = 0; i < pktLength - HEADER_SIZE; i++) {
-        content[seq * DATA_SIZE + i] = pkt[i + HEADER_SIZE];
-    }
 }

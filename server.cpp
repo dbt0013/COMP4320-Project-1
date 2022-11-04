@@ -23,7 +23,7 @@ using namespace std;
 int checkSum(char pkt[], int pktLength) {
     int checksum = 0;
 
-    for (int i = 6; i < len; i++) {
+    for (int i = 6; i < pktLength; i++) {
         checksum += (int)pkt[i];
     }
     return checksum;
@@ -130,10 +130,10 @@ int main(int argc, char *argv[]) {
         fclose(pf);
 
         //send file length
-        string filelength = intToStr(filelen);
-        strcpy(sendbuf, filelength.c_str());
-        sendnum = sendto(sockfd, sendbuf, strlen(sendbuf), 0, (struct sockaddr *)&cliaddr, clilen);
-        if(sendnum < 0) {
+        string filelength = intToString(fileLength);
+        strcpy(sendBuffer, filelength.c_str());
+        int sendNum = sendto(sockfd, sendBuffer, strlen(sendBuffer), 0, (struct sockaddr *)&clientaddr, clientLength);
+        if(sendNum < 0) {
             perror("error: sendto");
             exit(1);
         }
@@ -181,7 +181,7 @@ int main(int argc, char *argv[]) {
             }
             //send
             cout << "Sent packet [" << i << "] size: " << sizeof(pkt) << " bytes to client" << endl;
-            n = sendto(sockfd, (char *)sendBuffer, pktlen, 0, (struct sockaddr *)&cliaddr, clientLength);
+            n = sendto(sockfd, (char *)sendBuffer, pktlen, 0, (struct sockaddr *)&clientaddr, clientLength);
             if (n < 0) {
                 perror("error: Sending packet");
                 exit(EXIT_FAILURE);
@@ -190,7 +190,7 @@ int main(int argc, char *argv[]) {
             if(lastPacket) {
                 cout << "Full file sent to client" << endl;
                 bzero(&sendBuffer, BUFFSIZE);
-                n = sendto(sockfd, (char *)sendBuffer, 0, 0, (struct sockaddr *)&cliaddr, clientLength);
+                n = sendto(sockfd, (char *)sendBuffer, 0, 0, (struct sockaddr *)&clientaddr, clientLength);
                 if (n < 0) {
                     perror("error: Sending last packet");
                     exit(1);
