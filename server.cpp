@@ -23,7 +23,7 @@ using namespace std;
 int checkSum(char pkt[], int pktLength) {
     int checksum = 0;
 
-    for (int i = 7; i < len; i++) {
+    for (int i = 6; i < len; i++) {
         checksum += (int)pkt[i];
     }
     return checksum;
