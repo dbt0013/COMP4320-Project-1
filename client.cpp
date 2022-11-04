@@ -1,3 +1,9 @@
+/*
+Created by Carson Tillery and Brown Teague
+Fall 2022
+*/
+
+
 #include <iostream>
 #include <unistd.h>
 #include <sys/socket.h>
@@ -25,22 +31,21 @@ using namespace std;
 
 // Creates packet errors
 void gremlin(char pkt[], int pktLength, float probability) {
-    double randValue = rand() / RAND_MAX;
-    if (randValue > probability) {
+    if (1.0 * rand() / RAND_MAX > probability) {
         return;
     }
     
-    if (randValue >= 0 && randValue < 0.5) {
-        pkt[(int)(randValue * pktLength)] = '0';
+    if (1.0 * rand() / RAND_MAX >= 0 && 1.0 * rand() / RAND_MAX < 0.5) {
+        pkt[(int)(1.0 * rand() / RAND_MAX * pktLength)] = ~pkt[(int)(1.0 * rand() / RAND_MAX * pktLength)];
     }
-    else if (randValue >= 0.5 && randValue < 0.8) {
+    else if (1.0 * rand() / RAND_MAX >= 0.5 && 1.0 * rand() / RAND_MAX < 0.8) {
         for (int i = 0; i < 2; i++) {
-            pkt[(int)(randValue * pktLength)] = '0';
+            pkt[(int)(1.0 * rand() / RAND_MAX * pktLength)] = ~pkt[(int)(1.0 * rand() / RAND_MAX * pktLength)];
         }
     } 
     else {
         for (int i = 0; i < 3; i++){
-            pkt[(int)(randValue * pktLength)] = '0';
+            pkt[(int)(1.0 * rand() / RAND_MAX * pktLength)] = ~pkt[(int)(1.0 * rand() / RAND_MAX * pktLength)];
         }
     }
 }

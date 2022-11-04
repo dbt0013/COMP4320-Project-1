@@ -1,3 +1,9 @@
+/*
+Created by Carson Tillery and Brown Teague
+Fall 2022
+*/
+
+
 #include <iostream>
 #include <unistd.h>
 #include <sys/socket.h>
@@ -146,7 +152,7 @@ int main(int argc, char *argv[]) {
         for (int i = 0; i < (fileLength + (DATA_SIZE - 1)) / DATA_SIZE; i++) {
             bzero(&sendBuffer, BUFFSIZE);
             bool lastPacket = false;
-            if (i > 9999) {
+            if (i > 99999) {
                 perror("error: file is too large");
                 exit(EXIT_FAILURE);
             }
